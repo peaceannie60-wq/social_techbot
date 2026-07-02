@@ -19,7 +19,7 @@ if not TOKEN:
 CHANNEL_LINK = "https://t.me/blaqmarqetnotify"
 CHANNEL_USERNAME = "@blaqmarqetnotify"
 
-# Welcome message
+# Welcome message (NO LINK IN TEXT)
 WELCOME_MESSAGE = """Welcome to BLAQSTRATEGY! 👋
 
 We're glad to have you here. This channel is dedicated to providing **educational insights** for marketers who want to master the technical side of digital advertising.
@@ -36,8 +36,6 @@ Our content is focused on **knowledge and methodology**—not quick fixes or gua
 2. Feel free to browse the previous posts in the channel.
 3. If you have a specific topic you'd like us to cover, let us know!
 
-👉 **Join our channel:** {channel_link}
-
 Thank you for joining. Let's build better campaigns, together."""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -45,19 +43,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.info(f"User {user.first_name} (ID: {user.id}) started the bot")
     
-    # Create inline keyboard with channel link
+    # Create inline keyboard with ONLY the channel link in button
     keyboard = [
         [InlineKeyboardButton("📢 Join BLAQSTRATEGY Channel", url=CHANNEL_LINK)],
-        [InlineKeyboardButton("📚 View Channel Content", url=f"{CHANNEL_LINK}?before=0")]
+        [InlineKeyboardButton("📚 View Channel Content", url=CHANNEL_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    # Send welcome message
+    # Send welcome message (text without link)
     await update.message.reply_text(
-        WELCOME_MESSAGE.format(channel_link=CHANNEL_LINK),
+        WELCOME_MESSAGE,
         reply_markup=reply_markup,
         parse_mode='Markdown',
-        disable_web_page_preview=False
+        disable_web_page_preview=True
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -106,16 +104,15 @@ We focus on methodology, systems thinking, and data-driven approaches to help yo
 async def channel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send channel link when /channel is issued."""
     keyboard = [
-        [InlineKeyboardButton("📢 Open Channel", url=CHANNEL_LINK)],
+        [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)],
         [InlineKeyboardButton("📋 Copy Channel Link", url=CHANNEL_LINK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
         f"📢 **Join BLAQSTRATEGY**\n\n"
-        f"Click below to join our channel for educational insights on digital advertising.\n\n"
-        f"**Channel:** {CHANNEL_USERNAME}\n"
-        f"**Link:** {CHANNEL_LINK}",
+        f"Click the button below to join our channel for educational insights on digital advertising.\n\n"
+        f"**Channel:** {CHANNEL_USERNAME}",
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
