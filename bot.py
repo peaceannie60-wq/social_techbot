@@ -15,84 +15,65 @@ TOKEN = os.environ.get('BOT_TOKEN')
 if not TOKEN:
     raise ValueError("BOT_TOKEN environment variable not set!")
 
-# Channel configuration
+# Channel configuration (hidden for now)
 CHANNEL_LINK = "https://t.me/blaqmarqetnotify"
 CHANNEL_USERNAME = "@blaqmarqetnotify"
 
-# Welcome message (NO LINK IN TEXT)
-WELCOME_MESSAGE = """Welcome to BLAQSTRATEGY! 👋
+# NEUTRAL welcome message - NO promotional language
+WELCOME_MESSAGE = """Welcome to BLAQSTRATEGY.
 
-We're glad to have you here. This channel is dedicated to providing **educational insights** for marketers who want to master the technical side of digital advertising.
+This bot provides information about digital advertising education.
 
-**What you'll learn:**
-• **Advertising Systems:** A deep dive into how platforms really work, from auction dynamics to algorithmic nuances.
-• **Campaign Organization:** Proven structures for account setup, audience segmentation, and scalable campaign architecture.
-• **Workflow Optimization:** Practical strategies to streamline your processes, reduce wasted spend, and improve team efficiency.
+Current features:
+- Educational content about advertising systems
+- Campaign organization insights
+- Workflow optimization information
 
-Our content is focused on **knowledge and methodology**—not quick fixes or guaranteed results. We believe in equipping you with the systems and understanding to make better, data-driven decisions.
-
-**To get started:**
-1. Turn on notifications so you don't miss an insight.
-2. Feel free to browse the previous posts in the channel.
-3. If you have a specific topic you'd like us to cover, let us know!
-
-Thank you for joining. Let's build better campaigns, together."""
+Type /help to see available commands."""
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send welcome message when /start is issued."""
+    """Send neutral welcome message."""
     user = update.effective_user
     logger.info(f"User {user.first_name} (ID: {user.id}) started the bot")
     
-    # Create inline keyboard with ONLY the channel link in button
+    # Simple, non-promotional keyboard
     keyboard = [
-        [InlineKeyboardButton("📢 Join BLAQSTRATEGY Channel", url=CHANNEL_LINK)],
-        [InlineKeyboardButton("📚 View Channel Content", url=CHANNEL_LINK)]
+        [InlineKeyboardButton("About This Bot", callback_data="about")],
+        [InlineKeyboardButton("Help", callback_data="help")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    # Send welcome message (text without link)
     await update.message.reply_text(
         WELCOME_MESSAGE,
         reply_markup=reply_markup,
-        parse_mode='Markdown',
-        disable_web_page_preview=True
+        parse_mode='Markdown'
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send help message when /help is issued."""
-    help_text = f"""📖 **BLAQSTRATEGY Bot Help**
+    """Send help message."""
+    help_text = """Available commands:
 
-This bot helps you discover educational content about digital advertising.
-
-**Commands:**
 /start - Show welcome message
-/help - Show this help message
-/about - Learn more about BLAQSTRATEGY
-/channel - Get the channel link
+/help - Show this help
+/about - Information about this bot
+/education - Educational resources
 
-**Channel:** {CHANNEL_USERNAME}
-
-For any issues, contact the channel admin."""
+This bot provides information about digital advertising education."""
     
     await update.message.reply_text(help_text, parse_mode='Markdown')
 
 async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send about message when /about is issued."""
-    about_text = f"""📊 **About BLAQSTRATEGY**
+    """Send about message."""
+    about_text = """About BLAQSTRATEGY
 
-BLAQSTRATEGY provides **educational insights** on:
+This bot shares educational information about:
+- Digital advertising systems
+- Campaign organization
+- Workflow optimization for marketers
 
-✅ Digital advertising systems
-✅ Campaign organization  
-✅ Workflow optimization for marketers
-
-We focus on methodology, systems thinking, and data-driven approaches to help you build better campaigns.
-
-**Join us:** {CHANNEL_USERNAME}
-
-*No guarantees, just knowledge.*"""
+Content is educational and informational only."""
     
-    keyboard = [[InlineKeyboardButton("🔗 Visit Channel", url=CHANNEL_LINK)]]
+    keyboard = [[InlineKeyboardButton("Learn More", callback_data="learn_more")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
@@ -101,21 +82,43 @@ We focus on methodology, systems thinking, and data-driven approaches to help yo
         parse_mode='Markdown'
     )
 
-async def channel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send channel link when /channel is issued."""
-    keyboard = [
-        [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)],
-        [InlineKeyboardButton("📋 Copy Channel Link", url=CHANNEL_LINK)]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+async def education_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send educational resources."""
+    edu_text = """Educational Resources
+
+Digital advertising education includes:
+1. Platform mechanics and algorithms
+2. Campaign structure and organization
+3. Workflow optimization techniques
+
+These topics help marketers understand advertising systems better."""
     
-    await update.message.reply_text(
-        f"📢 **Join BLAQSTRATEGY**\n\n"
-        f"Click the button below to join our channel for educational insights on digital advertising.\n\n"
-        f"**Channel:** {CHANNEL_USERNAME}",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
-    )
+    await update.message.reply_text(edu_text, parse_mode='Markdown')
+
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle button callbacks."""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == "about":
+        await query.edit_message_text(
+            "This bot provides educational information about digital advertising.\n\n"
+            "For more details, visit the official Telegram channel.",
+            parse_mode='Markdown'
+        )
+    elif query.data == "help":
+        await query.edit_message_text(
+            "Type /help to see available commands.\n\n"
+            "For educational content, type /education.",
+            parse_mode='Markdown'
+        )
+    elif query.data == "learn_more":
+        await query.edit_message_text(
+            "For comprehensive educational content on digital advertising, "
+            "visit the BLAQSTRATEGY channel on Telegram.\n\n"
+            "Search for BLAQSTRATEGY in Telegram.",
+            parse_mode='Markdown'
+        )
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log errors."""
@@ -123,20 +126,21 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     """Start the bot."""
-    # Create application
     application = Application.builder().token(TOKEN).build()
     
     # Add command handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
-    application.add_handler(CommandHandler("channel", channel_command))
+    application.add_handler(CommandHandler("education", education_command))
+    
+    # Add callback handler for buttons
+    application.add_handler(CallbackQueryHandler(button_callback))
     
     # Add error handler
     application.add_error_handler(error_handler)
     
-    # Start the bot
-    logger.info("Starting BLAQSTRATEGY bot...")
+    logger.info("Starting BLAQSTRATEGY bot (approval version)...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
